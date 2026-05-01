@@ -1,207 +1,122 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Penjualan Beras</title>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<title>SI BERAS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-:root {
-    --primary-color: #4361ee;
-    --secondary-color: #3f37c9;
-}
-body { background:#f8f9fa; }
-.card { border-radius:12px; }
-.section { display:none; }
-.section.active { display:block; }
+body{font-family:Arial;background:#f2f2f2;padding:20px;}
+.card{background:#fff;padding:20px;border-radius:10px;margin-bottom:20px;}
+button{padding:10px;width:100%;background:#4361ee;color:white;border:none;border-radius:5px;}
+input{width:100%;padding:8px;margin:5px 0;}
 </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-light bg-white shadow-sm mb-4">
-<div class="container">
-    <b class="text-primary">SI-BERAS</b>
-    <div>
-        <button class="btn btn-sm btn-outline-primary" onclick="showSection('inputSection')">Input</button>
-        <button class="btn btn-sm btn-outline-primary" onclick="showSection('historySection')">Riwayat</button>
-        <button class="btn btn-sm btn-outline-primary" onclick="showSection('reportSection')">Laporan</button>
-    </div>
-</div>
-</nav>
+<h2>SI-BERAS</h2>
 
-<div class="container">
+<div class="card">
+<h3>Input Penjualan</h3>
 
-<!-- INPUT -->
-<div id="inputSection" class="section active">
-<div class="card p-4">
-<h5>Input Penjualan</h5>
+<form id="form">
+<input name="namaProduk" placeholder="Produk" required>
+<input name="namaClient" placeholder="Client" required>
 
-<form id="salesForm">
-<input name="namaProduk" class="form-control mb-2" placeholder="Nama Produk" required>
-<input name="namaClient" class="form-control mb-2" placeholder="Nama Client" required>
+<input type="number" name="jumlahKarung" placeholder="Jumlah Karung" required>
+<input type="number" name="hargaBeli" placeholder="Harga Beli / Karung" required>
+<input type="number" name="hargaJual" placeholder="Harga Jual / Karung" required>
 
-<label>Jumlah Karung</label>
-<input type="number" name="jumlahKarung" class="form-control mb-2" required>
-
-<label>Harga Beli / Karung</label>
-<input type="number" name="hargaBeli" class="form-control mb-2" required>
-
-<label>Harga Jual / Karung</label>
-<input type="number" name="hargaJual" class="form-control mb-2" required>
-
-<button class="btn btn-primary w-100 mt-2">Simpan</button>
+<button>SIMPAN</button>
 </form>
 </div>
-</div>
 
-<!-- RIWAYAT -->
-<div id="historySection" class="section">
-<div class="card p-3">
-<h5>Riwayat</h5>
+<div class="card">
+<h3>Riwayat</h3>
+<button onclick="load()">Refresh</button>
 
-<table class="table">
-<thead>
+<table border="1" width="100%" id="tabel">
 <tr>
 <th>Tanggal</th>
 <th>Produk</th>
 <th>Karung</th>
 <th>Untung</th>
 </tr>
-</thead>
-<tbody id="historyBody"></tbody>
 </table>
-
-<button onclick="loadData()" class="btn btn-sm btn-primary">Refresh</button>
-</div>
-</div>
-
-<!-- LAPORAN -->
-<div id="reportSection" class="section">
-
-<div class="row mb-3">
-<div class="col">
-<div class="card p-3 text-white" style="background:linear-gradient(45deg,#4361ee,#3f37c9)">
-Total Untung
-<h3 id="totalProfit">0</h3>
-</div>
-</div>
-
-<div class="col">
-<div class="card p-3">
-Total Karung
-<h3 id="totalKarung">0</h3>
-</div>
-</div>
-
-<div class="col">
-<div class="card p-3">
-Total Transaksi
-<h3 id="totalTrx">0</h3>
-</div>
-</div>
-</div>
-
-<table class="table table-bordered">
-<thead>
-<tr>
-<th>Periode</th>
-<th>Karung</th>
-<th>Omset</th>
-<th>Untung</th>
-</tr>
-</thead>
-<tbody id="reportBody"></tbody>
-</table>
-
-</div>
-
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz323sOqgJ3l9DU6Ve2oE3qT015onq7UxrMz7odgs548DFR2Y6yL3CnY1nEzT1SxeJ5/exec';
 
-let rawData = [];
+// 🔴 PASTE URL WEB APP DI SINI
+const URL = "https://script.google.com/macros/s/AKfycbyGrUx99zlwpqiT6Csa5fLayYpRAr910562ySDen1Y6kVB-r1LrN92L4rvCqXVfy_hA/exec";
 
-// pindah menu
-function showSection(id){
-    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
 
-    if(id !== 'inputSection') loadData();
-}
-
-// ambil data
-async function loadData(){
-    const res = await fetch(SCRIPT_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'read'})
+// 🔹 LOAD DATA
+async function load(){
+  try{
+    const res = await fetch(URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:"read"})
     });
 
     const json = await res.json();
-    rawData = json.data;
 
-    renderHistory();
-    renderReport();
-}
-
-// tampil riwayat
-function renderHistory(){
-    const body = document.getElementById('historyBody');
-
-    body.innerHTML = rawData.slice(-10).reverse().map(r=>`
-        <tr>
-            <td>${new Date(r[0]).toLocaleDateString()}</td>
-            <td>${r[1]}</td>
-            <td>${r[3]} Karung</td>
-            <td class="text-success">Rp ${r[9].toLocaleString()}</td>
-        </tr>
-    `).join('');
-}
-
-// laporan
-function renderReport(){
-    let totalKarung=0,totalOmset=0,totalUntung=0;
-
-    rawData.forEach(r=>{
-        totalKarung += r[3];
-        totalOmset += r[8];
-        totalUntung += r[9];
-    });
-
-    document.getElementById('totalKarung').innerText = totalKarung;
-    document.getElementById('totalProfit').innerText = "Rp "+totalUntung.toLocaleString();
-    document.getElementById('totalTrx').innerText = rawData.length;
-
-    document.getElementById('reportBody').innerHTML = `
+    let html = `
     <tr>
-        <td>Semua Data</td>
-        <td>${totalKarung}</td>
-        <td>Rp ${totalOmset.toLocaleString()}</td>
-        <td class="text-success">Rp ${totalUntung.toLocaleString()}</td>
+    <th>Tanggal</th>
+    <th>Produk</th>
+    <th>Karung</th>
+    <th>Untung</th>
     </tr>`;
-}
 
-// submit
-document.getElementById('salesForm').addEventListener('submit',async(e)=>{
-    e.preventDefault();
-
-    const data = Object.fromEntries(new FormData(e.target).entries());
-
-    await fetch(SCRIPT_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(data)
+    json.data.forEach(r=>{
+      html += `
+      <tr>
+      <td>${new Date(r[0]).toLocaleDateString()}</td>
+      <td>${r[1]}</td>
+      <td>${r[3]}</td>
+      <td>Rp ${r[9]}</td>
+      </tr>`;
     });
 
-    alert("Berhasil disimpan!");
-    e.target.reset();
+    document.getElementById("tabel").innerHTML = html;
+
+  }catch(e){
+    alert("Error load: "+e);
+  }
+}
+
+
+// 🔹 SUBMIT
+document.getElementById("form").addEventListener("submit",async(e)=>{
+  e.preventDefault();
+
+  const data = Object.fromEntries(new FormData(e.target).entries());
+
+  try{
+    const res = await fetch(URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+
+    const json = await res.json();
+
+    if(json.result=="success"){
+      alert("✅ Berhasil disimpan");
+      e.target.reset();
+      load();
+    }else{
+      alert("❌ "+json.error);
+    }
+
+  }catch(err){
+    alert("❌ Gagal koneksi");
+  }
+
 });
+
 </script>
 
 </body>
